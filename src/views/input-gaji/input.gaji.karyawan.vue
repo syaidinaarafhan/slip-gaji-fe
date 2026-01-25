@@ -9,7 +9,7 @@ import axiosInstance from '../../lib/axios/axios.js'
 
 const route = useRoute()
 const router = useRouter()
-const id = Number(route.params.id)
+const id = route.params.id
 
 const user = ref(null)
 const loading = ref(false)

@@ -13,7 +13,7 @@ const userData = ref({
 const salaryData = ref([])
 const loading = ref(false)
 const error = ref('')
-const selectedYear = ref('2025')
+const selectedYear = ref(new Date().getFullYear().toString())
 
 async function dashboardKaryawan() {
   loading.value = true
@@ -27,7 +27,7 @@ async function dashboardKaryawan() {
     }
     
     const slipMap = {}
-    data.slipgajis.forEach(slip => {
+    data.slipGaji.forEach(slip => {
       const date = new Date(slip.createdAt)
       const month = date.getMonth() + 1
       const year = date.getFullYear()
@@ -143,7 +143,7 @@ onMounted(() => {
               class="detail-btn" 
               @click="viewDetail(item.id)"
             >
-              ⊕
+              🔍
             </button>
           </div>
           <p class="amount" v-if="item.hasData">

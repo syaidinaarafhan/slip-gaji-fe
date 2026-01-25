@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import axiosInstance from '../../lib/axios/axios.js'
 import { useRouter, useRoute } from 'vue-router'
 import { NModal } from 'naive-ui'
@@ -10,6 +10,10 @@ const loading = ref(false)
 const error = ref('')
 const router = useRouter()
 const route = useRoute()
+
+const searchQuery = ref('')
+const currentPage = ref(1)
+const pageSize = 20
 
 const { logout, isLoggingOut } = logoutAuth()
 
@@ -26,6 +30,33 @@ async function fetchUsers() {
     loading.value = false
   }
 }
+
+const filteredUsers = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return users.value
+  }
+  
+  const query = searchQuery.value.toLowerCase()
+  return users.value.filter(user => 
+    user.name.toLowerCase().includes(query) ||
+    user.nik.toLowerCase().includes(query) ||
+    user.jabatan.toLowerCase().includes(query) ||
+    user.area.toLowerCase().includes(query)
+  )
+})
+
+const totalItems = computed(() => filteredUsers.value.length)
+const totalPages = computed(() => Math.ceil(totalItems.value / pageSize))
+
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  const end = start + pageSize
+  return filteredUsers.value.slice(start, end)
+})
+
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
 
 const isLogoutModalOpen = ref(false)
 
@@ -60,6 +91,34 @@ async function handleDelete() {
   } catch (err) {
     console.error('Error deleting user:', err)
     error.value = 'Gagal menghapus anggota'
+  }
+}
+
+async function handleSearch() {
+  const query = searchQuery.value.trim()
+  
+  if (!query) {
+    searchResults.value = []
+    return
+  }
+
+  isSearching.value = true
+  try {
+    const { data } = await axiosInstance.get('/slip/searchUsers', {
+      params: { query }
+    })
+    searchResults.value = data
+  } catch (e) {
+    console.error('Error searching:', e)
+    // Fallback: client-side search jika API gagal
+    const lowerQuery = query.toLowerCase()
+    searchResults.value = allUsers.value.filter(user => 
+      user.name.toLowerCase().includes(lowerQuery) ||
+      user.nik.toLowerCase().includes(lowerQuery) ||
+      user.jabatan.toLowerCase().includes(lowerQuery)
+    )
+  } finally {
+    isSearching.value = false
   }
 }
 
@@ -139,46 +198,78 @@ onMounted(() => {
     </transition>
 
     <div class="search-bar">
-      <input type="text" placeholder="Cari..." class="search-input" />
+      <input 
+        v-model="searchQuery" 
+        type="text" 
+        placeholder="🔍 Cari nama, NIK, jabatan, atau area..." 
+        class="search-input" 
+        @input="handleSearch"
+      />
       <button class="action-btn" @click="tambahKaryawan" title="Tambah Anggota">Tambah Anggota</button>
     </div>
 
     <p v-if="loading" class="loading">Memuat data...</p>
     <p v-if="error" class="error">{{ error }}</p>
 
-    <div v-if="!loading && users.length > 0" class="table-wrapper">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Nama Anggota</th>
-            <th>Jabatan</th>
-            <th>NIK/NIP</th>
-            <th>Area</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(user, index) in users" :key="user.id">
-            <td>{{ index + 1 }}</td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.jabatan }}</td>
-            <td>{{ user.nik }}</td>
-            <td>{{ user.area }}</td>
-            <td class="action-cell">
-              <button class="icon-btn edit-btn" @click="handleEdit(user)" title="Edit">
-                ✏️
-              </button>
-              <button class="icon-btn delete-btn" @click="showDeleteModal(user)" title="Hapus">
-                🗑️
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-if="!loading && paginatedUsers.length > 0" class="table-container">
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Anggota</th>
+              <th>Jabatan</th>
+              <th>NIK/NIP</th>
+              <th>Area</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(user, index) in users" :key="user.id">
+              <td>{{ index + 1 }}</td>
+              <td>{{ user.name }}</td>
+              <td>{{ user.jabatan }}</td>
+              <td>{{ user.nik }}</td>
+              <td>{{ user.area }}</td>
+              <td class="action-cell">
+                <button class="icon-btn edit-btn" @click="handleEdit(user)" title="Edit">
+                  ✏️
+                </button>
+                <button class="icon-btn delete-btn" @click="showDeleteModal(user)" title="Hapus">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div class="pagination">
+        <button 
+          class="page-btn"
+          :disabled="currentPage === 1"
+          @click="currentPage--"
+        >
+          ← Previous
+        </button>
+        
+        <div class="page-info">
+          Halaman {{ currentPage }} dari {{ totalPages }} (Total: {{ totalItems }} data)
+        </div>
+        
+        <button 
+          class="page-btn"
+          :disabled="currentPage === totalPages"
+          @click="currentPage++"
+        >
+          Next →
+        </button>
+      </div>
     </div>
 
-    <p v-if="!loading && users.length === 0" class="empty">Belum ada data anggota.</p>
+    <p v-if="!loading && paginatedUsers.length === 0" class="empty">
+      {{ searchQuery ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data anggota.' }}
+    </p>
 
     <n-modal
       v-if="userToDelete"
@@ -207,20 +298,30 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+}
+
+/* Layout */
 .page {
   min-height: 100vh;
-  background: #2c5282;
+  background: #f5f7fa;
   display: flex;
   flex-direction: column;
 }
 
+/* Header */
 .header {
-  background: #2b5278;
-  padding: 12px 16px;
+  background: #2c5282;
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .menu-btn {
@@ -230,6 +331,11 @@ onMounted(() => {
   font-size: 24px;
   cursor: pointer;
   padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .title {
@@ -237,114 +343,127 @@ onMounted(() => {
   margin: 0;
   color: white;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .logout-btn {
-  background: red;
-  border: 1px solid rgba(227, 41, 41, 0.3);
-  color: rgb(255, 255, 255);
-  padding: 6px 12px;
-  border-radius: 4px;
+  background: #e53e3e;
+  border: 1px solid #c53030;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .logout-btn:hover {
-  background: rgba(255, 1, 1, 0.1);
+  background: #c53030;
 }
 
-.add-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 28px;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-}
-
+/* Search Bar */
 .search-bar {
   background: white;
-  padding: 16px;
+  padding: 20px;
   display: flex;
   gap: 12px;
   align-items: center;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .search-input {
   flex: 1;
-  padding: 8px 12px;
+  padding: 12px 16px;
   border: 1px solid #cbd5e0;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 14px;
   outline: none;
 }
 
 .search-input:focus {
-  border-color: #4299e1;
+  border-color: #2c5282;
+  box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
 }
 
 .action-btn {
-  padding: 8px 16px;
-  background: #3182ce;
+  padding: 12px 20px;
+  background: #2c5282;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
   white-space: nowrap;
 }
 
 .action-btn:hover {
-  background: #2c5282;
+  background: #2a4365;
 }
 
+/* States */
 .loading,
 .error,
 .empty {
-  padding: 24px;
+  padding: 40px 20px;
   text-align: center;
-  color: white;
+  color: #4a5568;
+  font-size: 15px;
 }
 
 .error {
-  color: #fed7d7;
+  color: #e53e3e;
+}
+
+/* Table Container */
+.table-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  margin: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
 }
 
 .table-wrapper {
   overflow-x: auto;
+  flex: 1;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
 }
 
 .table thead {
-  background: #4a6fa5;
+  background: #2c5282;
   color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .table th {
-  padding: 12px 16px;
+  padding: 14px 16px;
   text-align: left;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .table tbody tr {
-  background: #6b8db8;
-  border-bottom: 2px solid #2c5282;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.table tbody tr:hover {
-  background: #5a7ca7;
+.table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .table td {
   padding: 16px;
-  color: white;
+  color: #2d3748;
   font-size: 14px;
 }
 
@@ -355,66 +474,181 @@ onMounted(() => {
 }
 
 .icon-btn {
-  background: none;
-  border: none;
+  background: #edf2f7;
+  border: 1px solid #cbd5e0;
   cursor: pointer;
   font-size: 18px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon-btn:hover {
-  background: rgba(255,255,255,0.1);
+  background: #e2e8f0;
+  border-color: #a0aec0;
 }
 
-.edit-btn:active {
-  transform: scale(0.95);
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid #e2e8f0;
+  background: #f7fafc;
 }
 
-.delete-btn:active {
-  transform: scale(0.95);
+.page-btn {
+  background: white;
+  border: 1px solid #cbd5e0;
+  color: #2d3748;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-/* Overlay */
-.overlay{
-  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+.page-btn:hover:not(:disabled) {
+  background: #edf2f7;
+  border-color: #a0aec0;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 14px;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+/* Sidebar Navigation */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   z-index: 9998;
 }
 
-/* Drawer */
-.sidenav{
-  position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
-  background: #1f3f66; color: #fff; z-index: 9999;
-  box-shadow: 2px 0 16px rgba(0,0,0,.25);
-  display: flex; flex-direction: column;
-}
-.sidenav-header{
-  display:flex; align-items:center; justify-content:space-between;
-  padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.1);
-}
-.burger{ letter-spacing: 3px; }
-.close-btn{
-  background:none; border:0; color:#fff; font-size:18px; cursor:pointer;
+.sidenav {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 260px;
+  background: #2c5282;
+  color: white;
+  z-index: 9999;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
 }
 
-.sidenav-nav{ padding: 12px; display: grid; gap: 10px; }
-.nav-item{
-  width: 100%; text-align: left; border: 0; cursor: pointer;
-  padding: 10px 12px; border-radius: 999px;
-  background: #204874; color: #fff; transition: background .15s;
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-.nav-item:hover{ background: #2b5b93; }
-.nav-item.active{
-  background: #5a7ca7;   /* biru muda saat aktif */
-  color: #0b1220;         /* kontras sedikit lebih gelap */
+
+.burger {
+  letter-spacing: 3px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: 0;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidenav-nav {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: transparent;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+  background: #4a6fa5;
   font-weight: 600;
 }
 
 /* Transitions */
-.slide-left-enter-from, .slide-left-leave-to { transform: translateX(-100%); }
-.slide-left-enter-active, .slide-left-leave-active { transition: transform .18s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-.fade-enter-active, .fade-leave-active { transition: opacity .18s ease; }
+.slide-left-enter-from,
+.slide-left-leave-to {
+  transform: translateX(-100%);
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .search-bar {
+    padding: 24px;
+  }
+
+  .table-container {
+    margin: 24px 32px;
+  }
+
+  .header {
+    padding: 16px 32px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .table-container {
+    margin: 24px 32px;
+  }
+}
 
 </style>

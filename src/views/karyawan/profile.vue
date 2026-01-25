@@ -112,9 +112,6 @@ onMounted(() => {
 
           <!-- Name -->
           <h2 class="profile-name">{{ user.name }}</h2>
-
-          <!-- Email -->
-          <p class="profile-email">{{ user.email }}</p>
         </div>
 
         <!-- Info Section -->
@@ -133,20 +130,6 @@ onMounted(() => {
               <div class="info-content">
                 <span class="info-label">Jabatan</span>
                 <span class="info-value">{{ user.jabatan || 'Tidak ada jabatan' }}</span>
-              </div>
-            </div>
-
-            <!-- Email Detail -->
-            <div class="info-item">
-              <div class="info-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
-                </svg>
-              </div>
-              <div class="info-content">
-                <span class="info-label">Email</span>
-                <span class="info-value">{{ user.email }}</span>
               </div>
             </div>
           </div>
@@ -210,19 +193,18 @@ onMounted(() => {
 /* Layout */
 .page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1f3654 0%, #2b5278 100%);
+  background: #f5f7fa;
   display: flex;
   flex-direction: column;
 }
 
 .header {
-  background: rgba(43, 82, 120, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 14px 16px;
+  background: #2c5282;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -236,24 +218,22 @@ onMounted(() => {
 }
 
 .logout-btn {
-  background: rgba(255, 71, 87, 0.15);
-  border: 1px solid rgba(255, 71, 87, 0.3);
-  color: #ff4757;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #e53e3e;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
   font-size: 20px;
 }
 
 .logout-btn:hover:not(:disabled) {
-  background: rgba(255, 71, 87, 0.25);
-  border-color: rgba(255, 71, 87, 0.5);
-  transform: translateY(-1px);
+  background: #fff5f5;
+  border-color: #feb2b2;
 }
 
 .logout-btn:disabled {
@@ -268,16 +248,16 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: #4a5568;
   gap: 16px;
-  padding-bottom: 80px; /* Space for bottom nav */
+  padding-bottom: 80px;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #fff;
+  border: 4px solid #e2e8f0;
+  border-top-color: #2c5282;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -293,53 +273,51 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  padding-bottom: 100px; /* Space for bottom nav */
+  padding-bottom: 100px;
 }
 
 .error-box {
-  background: rgba(255, 255, 255, 0.98);
+  background: #fff;
   padding: 32px 24px;
-  border-radius: 16px;
+  border-radius: 8px;
   text-align: center;
   max-width: 400px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #fc8181;
 }
 
 .error-icon {
-  color: #ff4757;
+  color: #e53e3e;
   margin-bottom: 16px;
 }
 
 .error-text {
-  color: #d32f2f;
+  color: #c53030;
   margin: 0 0 20px 0;
   font-size: 15px;
   line-height: 1.5;
 }
 
 .retry-btn {
-  background: #2b5278;
+  background: #2c5282;
   color: #fff;
   border: none;
   padding: 12px 28px;
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
-  transition: all 0.2s;
 }
 
 .retry-btn:hover {
-  background: #1f3654;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(43, 82, 120, 0.3);
+  background: #2a4365;
 }
 
 /* Content */
 .content {
   flex: 1;
   padding: 24px 16px;
-  padding-bottom: 100px; /* IMPORTANT: Space for bottom nav on mobile */
+  padding-bottom: 100px;
   overflow-y: auto;
 }
 
@@ -353,13 +331,13 @@ onMounted(() => {
 
 /* Profile Card */
 .profile-card {
-  background: rgba(255, 255, 255, 0.98);
-  border-radius: 20px;
+  background: #fff;
+  border-radius: 12px;
   padding: 40px 24px 32px;
   text-align: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
   position: relative;
-  overflow: hidden;
 }
 
 .profile-card::before {
@@ -368,9 +346,8 @@ onMounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  height: 100px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  opacity: 0.1;
+  height: 80px;
+  background: #edf2f7;
   z-index: 0;
 }
 
@@ -389,16 +366,16 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 2;
+  border: 4px solid #fff;
 }
 
 .avatar-initials {
   font-size: 42px;
   font-weight: 700;
   color: #fff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .avatar-ring {
@@ -408,7 +385,7 @@ onMounted(() => {
   right: -4px;
   bottom: -4px;
   border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid #e2e8f0;
   z-index: 1;
 }
 
@@ -416,7 +393,7 @@ onMounted(() => {
 .profile-name {
   font-size: 24px;
   font-weight: 700;
-  color: #1f3654;
+  color: #2d3748;
   margin: 0 0 8px 0;
   position: relative;
   z-index: 1;
@@ -424,7 +401,7 @@ onMounted(() => {
 
 .profile-email {
   font-size: 14px;
-  color: #666;
+  color: #718096;
   margin: 0 0 20px 0;
   position: relative;
   z-index: 1;
@@ -433,44 +410,44 @@ onMounted(() => {
 .reset-password-btn {
   background: none;
   border: none;
-  color: #00b4d8;
+  color: #3182ce;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
   position: relative;
   z-index: 1;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .reset-password-btn:hover {
-  background: rgba(0, 180, 216, 0.1);
-  color: #0096c7;
+  background: #ebf8ff;
+  color: #2c5282;
 }
 
 /* Info Section */
 .info-section {
-  background: rgba(255, 255, 255, 0.98);
-  border-radius: 16px;
+  background: #fff;
+  border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: #2d3748;
   margin: 0 0 20px 0;
   padding-bottom: 12px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 /* Info List */
 .info-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .info-item {
@@ -478,26 +455,21 @@ onMounted(() => {
   align-items: flex-start;
   gap: 16px;
   padding: 16px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  transition: all 0.2s;
-}
-
-.info-item:hover {
-  background: #e9ecef;
-  transform: translateX(4px);
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 .info-icon {
   width: 40px;
   height: 40px;
   min-width: 40px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  background: #edf2f7;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: #4a5568;
 }
 
 .info-content {
@@ -509,7 +481,7 @@ onMounted(() => {
 
 .info-label {
   font-size: 12px;
-  color: #666;
+  color: #718096;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -517,7 +489,7 @@ onMounted(() => {
 
 .info-value {
   font-size: 15px;
-  color: #212529;
+  color: #2d3748;
   font-weight: 600;
   word-break: break-word;
 }
@@ -536,35 +508,31 @@ onMounted(() => {
   justify-content: center;
   gap: 10px;
   padding: 14px 20px;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
   border: none;
 }
 
 .action-btn.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #2c5282;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .action-btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  background: #2a4365;
 }
 
 .action-btn.danger {
-  background: rgba(255, 71, 87, 0.1);
-  color: #ff4757;
-  border: 2px solid rgba(255, 71, 87, 0.3);
+  background: #fff;
+  color: #e53e3e;
+  border: 2px solid #feb2b2;
 }
 
 .action-btn.danger:hover:not(:disabled) {
-  background: rgba(255, 71, 87, 0.2);
-  border-color: rgba(255, 71, 87, 0.5);
-  transform: translateY(-2px);
+  background: #fff5f5;
+  border-color: #fc8181;
 }
 
 .action-btn:disabled {
@@ -578,11 +546,11 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(43, 82, 120, 0.95);
+  background: #2c5282;
   display: flex;
   justify-content: space-around;
   padding: 12px 0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
   z-index: 50;
 }
 
@@ -596,7 +564,6 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   padding: 8px 16px;
-  transition: color 0.2s;
   flex: 1;
   max-width: 120px;
 }
@@ -620,12 +587,10 @@ onMounted(() => {
 
 /* Responsive */
 @media (min-width: 768px) {
-  /* Hide bottom nav on tablet and desktop */
   .bottom-nav {
     display: none;
   }
 
-  /* Remove bottom padding when bottom nav is hidden */
   .content {
     padding: 40px 24px;
   }

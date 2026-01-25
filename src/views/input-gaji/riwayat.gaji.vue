@@ -36,10 +36,10 @@ async function fetchUser() {
 
 // Computed: filter slip gaji berdasarkan tahun yang dipilih
 const filteredSlips = computed(() => {
-  if (!user.value?.slipgajis) return []
+  if (!user.value?.slipGaji) return []
   
   if (selectedYear.value) {
-    return user.value.slipgajis.filter(slip => {
+    return user.value.slipGaji.filter(slip => {
       const slipYear = new Date(slip.createdAt).getFullYear()
       return slipYear === selectedYear.value
     })
@@ -47,7 +47,7 @@ const filteredSlips = computed(() => {
   
   // Kalau tidak ada filter, tampilkan tahun sekarang
   const currentYear = new Date().getFullYear()
-  return user.value.slipgajis.filter(slip => {
+  return user.value.slipGaji.filter(slip => {
     const slipYear = new Date(slip.createdAt).getFullYear()
     return slipYear === currentYear
   })
@@ -141,111 +141,235 @@ function goBack() {
 
 <style scoped>
 
-.filter-year {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 20px 0;
+/* Reset & Base */
+* {
+  box-sizing: border-box;
 }
 
-.filter-year label {
-  font-weight: 600;
-}
-
-/* Layout umum & header */
+/* Layout */
 .page {
   min-height: 100vh;
-  background: #1f3654; /* biru gelap seperti screenshot */
+  background: #f5f7fa;
   display: flex;
   flex-direction: column;
 }
+
+/* Header */
 .header {
-  background: #2b5278;
+  background: #2c5282;
   color: #fff;
-  padding: 10px 16px;
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-.title { font-size: 18px; margin: 0; }
-.back-btn { background: none; border: 0; color: #fff; cursor: pointer; font-size: 20px; }
 
-/* Kanvas konten */
+.title {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.back-btn {
+  background: none;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 4px 8px;
+  margin: -4px;
+  border-radius: 4px;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Container */
 .container {
   background: #fff;
   width: calc(100% - 32px);
-  max-width: 920px;
-  margin: 16px auto 24px;
-  padding: 18px 20px 28px;
-  border-radius: 6px;
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
-/* Label nama & tahun */
+/* Name Label */
 .name-label {
   color: #2d3748;
-  font-size: 14px;
-  margin-bottom: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
 }
+
+/* Filter Year */
+.filter-year {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.filter-year label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* Year Line */
 .year-line {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 14px;
+  margin-bottom: 24px;
 }
+
 .year {
   font-size: 28px;
   font-weight: 700;
-  color: #1a202c;
-}
-.year-line .line {
-  flex: 1;
-  height: 6px;
-  background: #1f3654;
-  border-radius: 3px;
+  color: #2d3748;
 }
 
-/* Grid bulan */
+.year-line .line {
+  flex: 1;
+  height: 4px;
+  background: #2c5282;
+  border-radius: 2px;
+}
+
+/* Months Grid */
 .months-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px 22px;
+  gap: 16px;
 }
 
 .month-card {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 12px 12px 14px;
-  min-height: 104px;
+  padding: 16px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  background: #fff;
+  background: #f7fafc;
 }
+
 .month-title {
   font-weight: 600;
+  font-size: 15px;
   color: #2d3748;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
+
 .amount {
-  font-size: 13px;
-  color: #2d3748;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c5282;
+  margin-bottom: 12px;
+  font-family: 'Courier New', monospace;
 }
+
 .empty {
-  font-size: 13px;
+  font-size: 14px;
   color: #a0aec0;
+  font-style: italic;
+  margin-bottom: 12px;
 }
 
-/* Hints & error */
-.hint { margin-top: 12px; color: #4a5568; }
-.error-text { margin-top: 12px; color: #c53030; }
-
-/* Responsif kecil */
-@media (max-width: 820px) {
-  .months-grid { grid-template-columns: repeat(3, 1fr); }
+.detail-btn {
+  background: #2c5282;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.detail-btn:hover {
+  background: #2a4365;
+}
+
+/* States */
+.hint {
+  margin-top: 20px;
+  color: #4a5568;
+  text-align: center;
+  font-size: 14px;
+}
+
+.error-text {
+  margin-top: 20px;
+  color: #e53e3e;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .header {
+    padding: 16px 24px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .container {
+    padding: 32px;
+    margin: 32px auto;
+  }
+
+  .name-label {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .months-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 600px) {
-  .months-grid { grid-template-columns: repeat(2, 1fr); }
+  .months-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .container {
+    width: calc(100% - 24px);
+    padding: 20px;
+    margin: 16px auto;
+  }
+
+  .year {
+    font-size: 24px;
+  }
+
+  .month-card {
+    min-height: 110px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .months-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 
