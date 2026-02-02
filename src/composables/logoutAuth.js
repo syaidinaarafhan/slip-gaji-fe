@@ -7,7 +7,7 @@ export function logoutAuth() {
   async function logout() {
     isLoggingOut.value = true
     try {
-      await axiosInstance.post('/api/auth/logout')
+      await axiosInstance.post('/auth/logout')
       
       window.location.href = '/login'
     } catch (error) {

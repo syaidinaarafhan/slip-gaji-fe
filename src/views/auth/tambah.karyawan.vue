@@ -13,7 +13,7 @@ async function onSubmit() {
   error.value = ''
   loading.value = true
   try {
-    await axiosInstance.post('/api/auth/register', {
+    await axiosInstance.post('/auth/register', {
         name: form.name, 
         password: form.password, 
         nik: form.nik,
