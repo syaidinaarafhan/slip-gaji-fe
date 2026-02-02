@@ -16,7 +16,7 @@ async function onSubmit() {
   error.value = ''
   loading.value = true
   try {
-    const response = await axiosInstance.post('/auth/login', { nik: form.nik, password: form.password })
+    const response = await axiosInstance.post('/api/auth/login', { nik: form.nik, password: form.password })
     auth.setUser(response.data.user)
     auth.hydrated = true
 
