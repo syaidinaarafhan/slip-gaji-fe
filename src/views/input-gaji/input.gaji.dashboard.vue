@@ -19,7 +19,7 @@ async function fetchUsers() {
   loading.value = true
   error.value = ''
   try {
-    const { data } = await axiosInstance.get('/slip/getAllDataUsers')
+    const { data } = await axiosInstance.get('/user')
     allUsers.value = data
   } catch (e) {
     error.value = e.response?.data?.message || 'Gagal memuat data'
@@ -44,7 +44,7 @@ async function createSlipGaji() {
   loading.value = true
   error.value = ''
   try {
-    await axiosInstance.post('/slip/inputSalaryByMaster', { 
+    await axiosInstance.post('/slip-gaji/generate-from-master', { 
       user_id: selectedUser.value.id 
     })
     alert('Slip gaji berhasil dibuat!') // Atau bisa pakai toast notification
@@ -60,36 +60,6 @@ async function createSlipGaji() {
 
 // ========== SEARCH ==========
 const searchQuery = ref('')
-const searchResults = ref([])
-const isSearching = ref(false)
-
-async function handleSearch() {
-  const query = searchQuery.value.trim()
-  
-  if (!query) {
-    searchResults.value = []
-    return
-  }
-
-  isSearching.value = true
-  try {
-    const { data } = await axiosInstance.get('/slip/searchUsers', {
-      params: { query }
-    })
-    searchResults.value = data
-  } catch (e) {
-    console.error('Error searching:', e)
-    // Fallback: client-side search jika API gagal
-    const lowerQuery = query.toLowerCase()
-    searchResults.value = allUsers.value.filter(user => 
-      user.name.toLowerCase().includes(lowerQuery) ||
-      user.nik.toLowerCase().includes(lowerQuery) ||
-      user.jabatan.toLowerCase().includes(lowerQuery)
-    )
-  } finally {
-    isSearching.value = false
-  }
-}
 
 // Filter users
 const { usersFilter, loadingFilter, errorFilter, filterUsers } = useUserFilter()
@@ -111,15 +81,24 @@ watch(selectedDate, (timestamp) => {
 
 // ========== COMPUTED: DATA YANG DITAMPILKAN ==========
 const baseUsers = computed(() => {
-  // Priority: search > filter > all
-  if (searchQuery.value.trim()) {
-    return searchResults.value
-  }
   return isFilterActive.value ? usersFilter.value : allUsers.value
 })
 
+const filteredUsers = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return baseUsers.value
+  }
+  
+  const query = searchQuery.value.toLowerCase()
+  return baseUsers.value.filter(user => 
+    user.name.toLowerCase().includes(query) ||
+    user.nik.toLowerCase().includes(query) ||
+    user.jabatan.toLowerCase().includes(query) ||
+    user.area.toLowerCase().includes(query)
+  )
+})
+
 const isLoading = computed(() => {
-  if (isSearching.value) return true
   return isFilterActive.value ? loadingFilter.value : loading.value
 })
 
@@ -131,13 +110,13 @@ const displayError = computed(() => {
 const currentPage = ref(1)
 const pageSize = 20
 
-const totalItems = computed(() => baseUsers.value.length)
+const totalItems = computed(() => filteredUsers.value.length)
 const totalPages = computed(() => Math.ceil(totalItems.value / pageSize))
 
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   const end = start + pageSize
-  return baseUsers.value.slice(start, end)
+  return filteredUsers.value.slice(start, end)
 })
 
 // Reset page ketika search
@@ -239,7 +218,6 @@ onMounted(() => {
           type="text"
           class="search-input"
           placeholder="🔍 Cari nama, NIK, atau jabatan..."
-          @input="handleSearch"
         />
       </div>
       

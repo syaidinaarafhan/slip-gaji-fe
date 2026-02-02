@@ -66,7 +66,7 @@ async function fetchUser () {
   try {
     loading.value = true
     error.value = ''
-    const { data } = await axiosInstance.get('/slip/getUserById', { params: { id } })
+    const { data } = await axiosInstance.get(`/user/${id}`)
     user.value = data
   } catch (e) {
     error.value = e?.response?.data?.message || 'Gagal memuat user'
@@ -101,7 +101,7 @@ async function submitGaji () {
 
   try {
     loading.value = true
-    await axiosInstance.post('/slip/inputSlipGaji', payload)
+    await axiosInstance.post('/slip-gaji', payload)
     router.back()
   } catch (e) {
     error.value = e.response?.data?.error || e.response?.data?.message || e.message || 'Gagal input gaji'

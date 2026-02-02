@@ -11,7 +11,9 @@ const error = ref('')
 const router = useRouter()
 const route = useRoute()
 
+// ✅ HANYA INI YANG DIPAKAI UNTUK SEARCH
 const searchQuery = ref('')
+
 const currentPage = ref(1)
 const pageSize = 20
 
@@ -21,7 +23,7 @@ async function fetchUsers() {
   loading.value = true
   error.value = ''
   try {
-    const { data } = await axiosInstance.get('/slip/getAllDataUsers')
+    const { data } = await axiosInstance.get('/user')
     users.value = data
   } catch (e) {
     error.value = e.response?.data?.message || 'Gagal memuat data'
@@ -31,6 +33,7 @@ async function fetchUsers() {
   }
 }
 
+// ✅ CLIENT-SIDE FILTERING (sudah ada, tetap dipakai)
 const filteredUsers = computed(() => {
   if (!searchQuery.value.trim()) {
     return users.value
@@ -54,6 +57,7 @@ const paginatedUsers = computed(() => {
   return filteredUsers.value.slice(start, end)
 })
 
+// ✅ Reset page saat search (tetap ada)
 watch(searchQuery, () => {
   currentPage.value = 1
 })
@@ -71,6 +75,7 @@ function showDeleteModal(user) {
   userToDelete.value = user
   isOpen.value = true
 }
+
 function handleEdit(user) {
   router.push(`/admin/editK/${user.id}`)
 }
@@ -81,7 +86,7 @@ function tambahKaryawan() {
 
 async function handleDelete() {
   try {
-    await axiosInstance.delete(`/auth/deleteUser/${userToDelete.value.id}`)
+    await axiosInstance.delete(`/user/${userToDelete.value.id}`)
     
     isOpen.value = false
     
@@ -91,34 +96,6 @@ async function handleDelete() {
   } catch (err) {
     console.error('Error deleting user:', err)
     error.value = 'Gagal menghapus anggota'
-  }
-}
-
-async function handleSearch() {
-  const query = searchQuery.value.trim()
-  
-  if (!query) {
-    searchResults.value = []
-    return
-  }
-
-  isSearching.value = true
-  try {
-    const { data } = await axiosInstance.get('/slip/searchUsers', {
-      params: { query }
-    })
-    searchResults.value = data
-  } catch (e) {
-    console.error('Error searching:', e)
-    // Fallback: client-side search jika API gagal
-    const lowerQuery = query.toLowerCase()
-    searchResults.value = allUsers.value.filter(user => 
-      user.name.toLowerCase().includes(lowerQuery) ||
-      user.nik.toLowerCase().includes(lowerQuery) ||
-      user.jabatan.toLowerCase().includes(lowerQuery)
-    )
-  } finally {
-    isSearching.value = false
   }
 }
 
@@ -202,8 +179,7 @@ onMounted(() => {
         v-model="searchQuery" 
         type="text" 
         placeholder="🔍 Cari nama, NIK, jabatan, atau area..." 
-        class="search-input" 
-        @input="handleSearch"
+        class="search-input"
       />
       <button class="action-btn" @click="tambahKaryawan" title="Tambah Anggota">Tambah Anggota</button>
     </div>
@@ -225,7 +201,7 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(user, index) in users" :key="user.id">
+            <tr v-for="(user, index) in paginatedUsers" :key="user.id">
               <td>{{ index + 1 }}</td>
               <td>{{ user.name }}</td>
               <td>{{ user.jabatan }}</td>

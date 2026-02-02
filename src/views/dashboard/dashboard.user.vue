@@ -19,7 +19,7 @@ async function dashboardKaryawan() {
   loading.value = true
   error.value = ''
   try {
-    const { data } = await axiosInstance.get('/slipka/getDashboardKaryawan')
+    const { data } = await axiosInstance.get('/slip-gaji/karyawan/dashboard')
     
     userData.value = {
       name: data.name,

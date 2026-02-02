@@ -15,7 +15,7 @@ async function fetchUser() {
   try {
     loading.value = true
     error.value = ''
-    const { data } = await axiosInstance.get('/slipka/getDetailSlipGaji', { params: { id } })
+    const { data } = await axiosInstance.get(`/slip-gaji/${id}`)
     user.value = data
   } catch (e) {
     error.value = e?.response?.data?.message || 'Gagal memuat user'
@@ -27,7 +27,7 @@ async function fetchUser() {
 async function exportToPDF() {
   try {
     loading.value = true
-    const { data } = await axiosInstance.get('/slipka/export-to-pdf', { 
+    const { data } = await axiosInstance.get('/slip-gaji/karyawan/export-to-pdf', { 
       params: { id },
       responseType: 'blob' 
     })

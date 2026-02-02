@@ -24,7 +24,7 @@ async function fetchUser() {
   try {
     loading.value = true
     error.value = ''
-    const { data } = await axiosInstance.get('/slip/getUserByIdWithSlip', { params: { id } })
+    const { data } = await axiosInstance.get(`/slip-gaji/${id}/slips`)
     user.value = data
     console.log(user.id)
   } catch (e) {

@@ -18,7 +18,7 @@ async function fetchUser() {
   try {
     loading.value = true
     error.value = ''
-    const { data } = await axiosInstance.get('/slipka/getProfile')
+    const { data } = await axiosInstance.get('/user/profile')
     user.value = data
   } catch (e) {
     error.value = e?.response?.data?.message || 'Gagal memuat user'

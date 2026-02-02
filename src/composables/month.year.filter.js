@@ -14,7 +14,7 @@ export function useUserFilter() {
             const params = { year }
             if (month) params.month = month
 
-            const { data } = await axiosInstance.get('/slip/getFilteredUserWithSlip', { params });
+            const { data } = await axiosInstance.get('/user/with-slips', { params });
             usersFilter.value = data
         } catch (e) {
             errorFilter.value = e.response?.data?.message || 'Gagal memuat data'

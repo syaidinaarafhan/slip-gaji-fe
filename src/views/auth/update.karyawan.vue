@@ -6,17 +6,17 @@ import axiosInstance  from '../../lib/axios/axios.js'
 
 const router = useRouter()
 const route = useRoute()
-const form = reactive({name: '', jabatan: '', nik: ''})
+const form = reactive({name: '', nik: '', area: ''})
 const loading = ref(false)
 const error = ref('')
-const user_id = parseInt(route.params.id)
+const user_id = route.params.id
 
 async function onSubmit() {
   error.value = ''
   loading.value = true
   try {
     
-    await axiosInstance.put('/auth/editUser', {id: user_id, name: form.name, jabatan: form.jabatan, nik: form.nik})
+    await axiosInstance.put(`/user/${user_id}`, { name: form.name, nik: form.nik, area: form.area})
     
     router.push('/admin')
 
@@ -48,20 +48,20 @@ async function onSubmit() {
           required
         />
 
-        <label class="label">Jabatan</label>
-        <input
-          v-model="form.jabatan"
-          class="input"
-          placeholder="Jabatan"
-          autocomplete="username"
-          required
-        />
-
         <label class="label">NIK</label>
         <input
           v-model="form.nik"
           class="input"
           placeholder="NIK"
+          autocomplete="username"
+          required
+        />
+
+        <label class="label">Area</label>
+        <input
+          v-model="form.area"
+          class="input"
+          placeholder="Area"
           autocomplete="username"
           required
         />

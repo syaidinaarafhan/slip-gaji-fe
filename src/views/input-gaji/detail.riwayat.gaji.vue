@@ -15,7 +15,7 @@ async function fetchUser() {
   try {
     loading.value = true
     error.value = ''
-    const { data } = await axiosInstance.get('/slipka/getDetailSlipGaji', { params: { id } })
+    const { data } = await axiosInstance.get(`/slip-gaji/karyawan/${id}`)
     user.value = data
   } catch (e) {
     error.value = e?.response?.data?.message || 'Gagal memuat user'

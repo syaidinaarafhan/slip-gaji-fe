@@ -54,7 +54,7 @@ async function fetchUsers() {
   loading.value = true
   error.value = ''
   try {
-    const { data } = await axiosInstance.get('/masterSlips')
+    const { data } = await axiosInstance.get('/slipmaster')
     
     // ✅ FIX: Ambil array dari property "data"
     allUsers.value = data.data || data
@@ -206,7 +206,7 @@ async function handleFileUpload(event) {
     const formData = new FormData()
     formData.append('file', file)
 
-    const { data } = await axiosInstance.post('/importMasterSlip', formData, {
+    const { data } = await axiosInstance.post('/slipmaster', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
 
@@ -231,7 +231,7 @@ function showDeleteModal() {
 
 async function deleteAllSlipGaji() {
   try {
-    await axiosInstance.delete('/deleteAllMasterSlip')
+    await axiosInstance.delete('/slipmaster')
 
     isDeleteModalOpen.value = false
 
@@ -277,16 +277,6 @@ onMounted(() => {
       
       <!-- Filter & Actions Row -->
       <div class="filter-actions-row">
-        <div class="filter-bar">
-          <label class="filter-label">Slip Gaji Bulan:</label>
-          <n-date-picker 
-            v-model:value="selectedDate" 
-            type="month" 
-            placeholder="Pilih Bulan & Tahun"
-            clearable
-            class="filter-picker"
-          />
-        </div>
         
         <div class="action-buttons">
           <label for="file-upload" class="import-btn">
