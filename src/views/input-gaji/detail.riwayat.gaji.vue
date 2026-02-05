@@ -15,7 +15,7 @@ async function fetchUser() {
   try {
     loading.value = true
     error.value = ''
-    const { data } = await axiosInstance.get(`/slip-gaji/karyawan/${id}`)
+    const { data } = await axiosInstance.get(`/slip-gaji/${id}`)
     user.value = data
   } catch (e) {
     error.value = e?.response?.data?.message || 'Gagal memuat user'
@@ -34,7 +34,7 @@ const formatRupiah = (value) => {
 const totalPotongan = computed(() => {
   if (!user.value) return 0
   return (user.value.bpjs_tk || 0) + 
-         (user.value.bpjs_kes_ii || 0) + 
+         (user.value.bpjs_ks || 0) + 
          (user.value.kasbon || 0) + 
          (user.value.sawb || 0) + 
          (user.value.seragam || 0) + 
@@ -80,15 +80,6 @@ function goBack() {
     <!-- Content -->
     <div v-else-if="user" class="content">
       <div class="container">
-        
-        <!-- Info Hari Kerja -->
-        <div class="info-card">
-          <div class="info-icon">📅</div>
-          <div class="info-content">
-            <span class="info-label">Hari Kerja</span>
-            <span class="info-value">{{ user.hari_kerja }} Hari</span>
-          </div>
-        </div>
 
         <!-- Section Potongan -->
         <section class="section">
@@ -102,7 +93,7 @@ function goBack() {
             
             <div class="item">
               <span class="item-label">BPJS KES II</span>
-              <span class="item-value">{{ formatRupiah(user.bpjs_kes_ii) }}</span>
+              <span class="item-value">{{ formatRupiah(user.bpjs_ks) }}</span>
             </div>
             
             <div class="item">

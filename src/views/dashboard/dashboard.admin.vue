@@ -62,6 +62,14 @@ watch(searchQuery, () => {
   currentPage.value = 1
 })
 
+// ✅ Scroll to top saat ganti page
+watch(currentPage, () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth' // Smooth scroll
+  })
+})
+
 const isLogoutModalOpen = ref(false)
 
 function showLogoutModal() {

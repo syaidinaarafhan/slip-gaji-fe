@@ -114,6 +114,14 @@ watch([searchQuery, selectedDate], () => {
   currentPage.value = 1
 })
 
+// ✅ Scroll to top saat ganti page
+watch(currentPage, () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth' // Smooth scroll
+  })
+})
+
 // Computed: tentukan data mana yang ditampilkan
 const displayedUsers = computed(() => {
   return isFilterActive.value ? usersFilter.value : allUsers.value

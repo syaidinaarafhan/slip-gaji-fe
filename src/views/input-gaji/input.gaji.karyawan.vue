@@ -17,11 +17,10 @@ const error = ref('')
 
 const form = reactive({
   // inputan wajib / bebas edit
-  hari_kerja: null,
-  tunjangan_tetap: null,
+  tunjangan_jabatan: null,
   // potongan
   bpjs_tk: null,
-  bpjs_kes_ii: null,
+  bpjs_ks: null,
   kasbon: null,
   sawb: null,
   seragam: null,
@@ -48,18 +47,21 @@ const upahHarianOtomatis = computed(() => {
 })
 
 // gaji pokok = upah harian × hari kerja
-const gajiPokok = computed(() => upahHarianOtomatis.value * (+form.hari_kerja || 0))
+const gajiPokok = computed(() => upahHarianOtomatis.value )
+const total_upah_kotor = computed(() =>
+  gajiPokok.value + (+form.tunjangan_jabatan || 0)
+)
 
 // total potongan (inkl. “pengurangan” khusus yang kamu tambahkan)
 const totalPotongan = computed(() => {
   const f = form
-  return (+f.bpjs_tk || 0) + (+f.bpjs_kes_ii || 0) + (+f.kasbon || 0) +
+  return (+f.bpjs_tk || 0) + (+f.bpjs_ks || 0) + (+f.kasbon || 0) +
          (+f.sawb || 0) + (+f.seragam || 0) + (+f.diklat || 0) + (+f.pengurangan || 0)
 })
 
-// upah yang diterima = gaji pokok + tunjangan tetap + bonus − total potongan
+// upah yang diterima = gaji pokok + tunjangan jabatan + bonus − total potongan
 const gajiBersih = computed(() =>
-  gajiPokok.value + (+form.tunjangan_tetap || 0) + (+form.bonus || 0) - totalPotongan.value
+  gajiPokok.value + (+form.tunjangan_jabatan || 0) + (+form.bonus || 0) - totalPotongan.value
 )
 
 async function fetchUser () {
@@ -81,15 +83,14 @@ onMounted(fetchUser)
 async function submitGaji () {
   error.value = ''
   if (!user.value?.id) { error.value = 'User tidak ditemukan.'; return }
-  if (form.hari_kerja == null) { error.value = 'Hari kerja wajib diisi.'; return }
 
   const payload = {
     user_id: user.value.id,
     jabatan: user.value.jabatan,
-    hari_kerja: +form.hari_kerja,
-    tunjangan_tetap: +form.tunjangan_tetap || 0,
+    tunjangan_jabatan: +form.tunjangan_jabatan || 0,
+    total_upah_kotor: total_upah_kotor.value,
     bpjs_tk: +form.bpjs_tk || 0,
-    bpjs_kes_ii: +form.bpjs_kes_ii || 0,
+    bpjs_ks: +form.bpjs_ks || 0,
     kasbon: +form.kasbon || 0,
     sawb: +form.sawb || 0,
     seragam: +form.seragam || 0,
@@ -138,12 +139,6 @@ function goBack () { router.back() }
                 <div class="readonly-field">{{ user?.jabatan ?? '—' }}</div>
               </NFormItem>
             </NGi>
-
-            <NGi :span="2">
-              <NFormItem label="Hari Kerja">
-                <NInputNumber v-model:value="form.hari_kerja" :min="0" />
-              </NFormItem>
-            </NGi>
           </NGrid>
 
           <!-- Gaji otomatis -->
@@ -155,12 +150,6 @@ function goBack () { router.back() }
               </NFormItem>
             </NGi>
 
-            <NGi :span="3">
-              <NFormItem label="Perkalian Hari">
-                <div class="readonly-field">{{ form.hari_kerja ?? 0 }}</div>
-              </NFormItem>
-            </NGi>
-
             <NGi :span="5">
               <NFormItem label="Gaji Pokok (Upah × Hari)">
                 <div class="readonly-field">{{ formatRp(gajiPokok) }}</div>
@@ -168,8 +157,8 @@ function goBack () { router.back() }
             </NGi>
 
             <NGi :span="6">
-              <NFormItem label="Tunjangan Tetap">
-                <NInputNumber v-model:value="form.tunjangan_tetap" :min="0" />
+              <NFormItem label="Tunjangan Jabatan">
+                <NInputNumber v-model:value="form.tunjangan_jabatan" :min="0" />
               </NFormItem>
             </NGi>
           </NGrid>
@@ -186,8 +175,8 @@ function goBack () { router.back() }
               </NFormItem>
             </NGi>
             <NGi :span="6">
-              <NFormItem label="BPJS KES II">
-                <NInputNumber v-model:value="form.bpjs_kes_ii" :min="0" />
+              <NFormItem label="BPJS KS">
+                <NInputNumber v-model:value="form.bpjs_ks" :min="0" />
               </NFormItem>
             </NGi>
             <NGi :span="6">
@@ -234,7 +223,7 @@ function goBack () { router.back() }
           <NDivider />
           <div class="summary">
             <div><NText depth="3">Gaji Pokok (Upah × Hari)</NText> <strong>{{ formatRp(gajiPokok) }}</strong></div>
-            <div><NText depth="3">Tunjangan Tetap</NText> <strong>{{ formatRp(form.tunjangan_tetap) }}</strong></div>
+            <div><NText depth="3">Tunjangan Tetap</NText> <strong>{{ formatRp(form.tunjangan_jabatan) }}</strong></div>
             <div><NText depth="3">Bonus</NText> <strong>{{ formatRp(form.bonus) }}</strong></div>
             <div><NText depth="3">Total Potongan (incl. Pengurangan)</NText> <strong>- {{ formatRp(totalPotongan) }}</strong></div>
             <div class="net">

@@ -394,62 +394,52 @@ onMounted(() => {
 
 /* Desktop Styles */
 @media (min-width: 768px) {
-  .page {
-    padding-bottom: 40px;
-  }
-
-  .header {
-    padding: 32px 40px;
-  }
-
-  .avatar {
-    width: 80px;
-    height: 80px;
-    font-size: 40px;
-  }
-
-  .user-name {
-    font-size: 28px;
-  }
-
-  .user-position {
-    font-size: 16px;
-  }
-
-  .content {
-    padding: 40px;
-  }
-
-  .chart-section {
-    padding: 32px;
-    margin-bottom: 32px;
-  }
-
-  .chart-placeholder {
-    height: 250px;
-  }
-
-  .salary-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 24px;
-  }
-
-  .salary-card {
-    padding: 24px;
-  }
-
-  .month {
-    font-size: 18px;
-  }
-
-  .amount {
-    font-size: 16px;
-  }
-
-  /* Hide bottom nav on desktop */
   .bottom-nav {
-    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 50%; /* Center horizontal */
+    transform: translateX(-50%);
+    right: auto;
+    width: auto;
+    max-width: 500px;
+    border-radius: 16px 16px 0 0;
+    background: rgba(43, 82, 120, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 16px 32px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    gap: 40px; /* Space antar item */
   }
+
+  .nav-item {
+    flex-direction: row;
+    gap: 10px;
+    padding: 8px 20px;
+    border-radius: 12px;
+    transition: background 0.2s;
+  }
+
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-item.active {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .nav-icon {
+    font-size: 22px;
+  }
+
+  .nav-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .page {
+    padding-bottom: 100px; /* Space untuk nav yang lebih besar */
+  }
+
+  /* ... sisanya tetap sama ... */
 }
 
 @media (min-width: 1024px) {

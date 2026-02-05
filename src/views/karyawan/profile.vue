@@ -588,61 +588,51 @@ onMounted(() => {
 /* Responsive */
 @media (min-width: 768px) {
   .bottom-nav {
-    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 50%; /* Center horizontal */
+    transform: translateX(-50%);
+    right: auto;
+    width: auto;
+    max-width: 500px;
+    border-radius: 16px 16px 0 0;
+    background: rgba(43, 82, 120, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 16px 32px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    gap: 40px; /* Space antar item */
   }
 
-  .content {
-    padding: 40px 24px;
-  }
-
-  .loading-container {
-    padding-bottom: 0;
-  }
-
-  .error-container {
-    padding-bottom: 20px;
-  }
-
-  .container {
-    max-width: 700px;
-  }
-
-  .header {
-    padding: 16px 24px;
-  }
-
-  .header-title {
-    font-size: 20px;
-  }
-
-  .profile-card {
-    padding: 48px 32px 40px;
-  }
-
-  .avatar {
-    width: 140px;
-    height: 140px;
-  }
-
-  .avatar-initials {
-    font-size: 48px;
-  }
-
-  .profile-name {
-    font-size: 28px;
-  }
-
-  .profile-email {
-    font-size: 15px;
-  }
-
-  .action-section {
+  .nav-item {
     flex-direction: row;
+    gap: 10px;
+    padding: 8px 20px;
+    border-radius: 12px;
+    transition: background 0.2s;
   }
 
-  .action-btn {
-    flex: 1;
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
+
+  .nav-item.active {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .nav-icon {
+    font-size: 22px;
+  }
+
+  .nav-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .page {
+    padding-bottom: 100px; /* Space untuk nav yang lebih besar */
+  }
+
+  /* ... sisanya tetap sama ... */
 }
 
 @media (min-width: 1024px) {

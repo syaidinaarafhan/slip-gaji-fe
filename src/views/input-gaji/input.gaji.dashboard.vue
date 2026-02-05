@@ -108,7 +108,7 @@ const displayError = computed(() => {
 
 // ========== PAGINATION ==========
 const currentPage = ref(1)
-const pageSize = 20
+const pageSize = 7
 
 const totalItems = computed(() => filteredUsers.value.length)
 const totalPages = computed(() => Math.ceil(totalItems.value / pageSize))
@@ -122,6 +122,14 @@ const paginatedUsers = computed(() => {
 // Reset page ketika search
 watch(searchQuery, () => {
   currentPage.value = 1
+})
+
+// ✅ Scroll to top saat ganti page
+watch(currentPage, () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth' // Smooth scroll
+  })
 })
 
 // ========== LOGOUT ==========
@@ -161,19 +169,37 @@ const isActive = (path) => {
 
 // ========== EXPORT EXCEL ==========
 function exportToExcel() {
-  const dataToExport = baseUsers.value // Gunakan baseUsers (bisa search/filter result)
+  // Gunakan data yang sesuai dengan filter aktif atau tidak
+  const dataToExport = isFilterActive.value ? usersFilter.value : baseUsers.value
 
   if (dataToExport.length === 0) {
     alert('Tidak ada data untuk di-export')
     return
   }
 
-  const worksheetData = dataToExport.map((user, index) => ({
-    'No': index + 1,
-    'Nama': user.name,
-    'NIK': user.nik,
-    'Jabatan': user.jabatan,
-  }))
+  const worksheetData = dataToExport.map((user, index) => {
+    // Ambil slip gaji pertama jika ada (karena dalam array)
+    const slip = user.slipGaji && user.slipGaji.length > 0 ? user.slipGaji[0] : null
+
+    return {
+      'No': index + 1,
+      'Nama': user.name,
+      'NIK': user.nik,
+      'Jabatan': user.jabatan,
+      'Area': user.area,
+      'Upah Pokok': slip?.upah_pokok || 0,
+      'Tunjangan Jabatan': slip?.tunjangan_jabatan || 0,
+      'Total Upah Kotor' : slip?.total_upah_kotor || 0,
+      'BPJS TK': slip?.bpjs_tk || 0,
+      'BPJS KS': slip?.bpjs_ks || 0,
+      'Kasbon': slip?.kasbon_dulu || 0,
+      'KTA': slip?.kta || 0,
+      'Diklat': slip?.diklat || 0,
+      'Bonus': slip?.bonus || 0,
+      'Pengurangan': slip?.pengurangan || 0,
+      'Upah Diterima': slip?.upah_yang_diterima || 0,
+    }
+  })
 
   const ws = XLSX.utils.json_to_sheet(worksheetData)
   const wb = XLSX.utils.book_new()
