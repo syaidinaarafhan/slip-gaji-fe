@@ -24,24 +24,21 @@ async function fetchUser() {
   }
 }
 
-// Format rupiah
 const formatRupiah = (value) => {
   if (!value && value !== 0) return 'Rp. 0'
   return 'Rp. ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 }
 
-// Hitung total potongan
+// ✅ PERBAIKAN: Hitung total potongan sesuai schema
 const totalPotongan = computed(() => {
   if (!user.value) return 0
   return (user.value.bpjs_tk || 0) + 
          (user.value.bpjs_ks || 0) + 
-         (user.value.kasbon || 0) + 
-         (user.value.sawb || 0) + 
-         (user.value.seragam || 0) + 
+         (user.value.kasbon_dulu || 0) +   // ✅ FIX
+         (user.value.kta || 0) +            // ✅ FIX
          (user.value.diklat || 0)
 })
 
-// Hitung total transaksi khusus
 const totalTransaksi = computed(() => {
   if (!user.value) return 0
   return (user.value.bonus || 0) - (user.value.pengurangan || 0)
@@ -63,13 +60,11 @@ function goBack() {
       <h1 class="title">Detail Gaji</h1>
     </header>
 
-    <!-- Loading State -->
     <div v-if="loading" class="loading-container">
       <div class="spinner"></div>
       <p>Memuat data...</p>
     </div>
 
-    <!-- Error State -->
     <div v-else-if="error" class="error-container">
       <div class="error-box">
         <p class="error-text">{{ error }}</p>
@@ -77,11 +72,9 @@ function goBack() {
       </div>
     </div>
 
-    <!-- Content -->
     <div v-else-if="user" class="content">
       <div class="container">
 
-        <!-- Section Potongan -->
         <section class="section">
           <h2 class="section-title">Section Potongan</h2>
           
@@ -92,23 +85,18 @@ function goBack() {
             </div>
             
             <div class="item">
-              <span class="item-label">BPJS KES II</span>
+              <span class="item-label">BPJS KES</span>
               <span class="item-value">{{ formatRupiah(user.bpjs_ks) }}</span>
             </div>
             
             <div class="item">
               <span class="item-label">KASBON</span>
-              <span class="item-value">{{ formatRupiah(user.kasbon) }}</span>
+              <span class="item-value">{{ formatRupiah(user.kasbon_dulu) }}</span>  <!-- ✅ FIX -->
             </div>
             
             <div class="item">
-              <span class="item-label">SAWB</span>
-              <span class="item-value">{{ formatRupiah(user.sawb) }}</span>
-            </div>
-            
-            <div class="item">
-              <span class="item-label">SERAGAM</span>
-              <span class="item-value">{{ formatRupiah(user.seragam) }}</span>
+              <span class="item-label">KTA</span>  <!-- ✅ FIX -->
+              <span class="item-value">{{ formatRupiah(user.kta) }}</span>  <!-- ✅ FIX -->
             </div>
             
             <div class="item">
@@ -123,7 +111,6 @@ function goBack() {
           </div>
         </section>
 
-        <!-- Section Transaksi Khusus -->
         <section class="section">
           <h2 class="section-title">Section Transaksi Khusus</h2>
           
@@ -147,7 +134,6 @@ function goBack() {
           </div>
         </section>
 
-        <!-- Total Upah Yang Diterima -->
         <div class="final-total">
           <div class="final-label">Upah Yang Diterima :</div>
           <div class="final-value">{{ formatRupiah(user.upah_yang_diterima) }}</div>
