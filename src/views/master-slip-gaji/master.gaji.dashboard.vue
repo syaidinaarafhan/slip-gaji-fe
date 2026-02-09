@@ -249,6 +249,11 @@ async function deleteAllSlipGaji() {
   }
 }
 
+const formatRupiah = (value) => {
+  if (!value && value !== 0) return 'Rp. 0'
+  return 'Rp. ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
 onMounted(() => {
   fetchUsers()
 })
@@ -364,7 +369,7 @@ onMounted(() => {
               <td>{{ user.nik_baru }}</td>
               <td>{{ user.area }}</td>
               <td>{{ user.bagian }}</td>
-              <td>{{ user.total_upah_bersih }}</td>
+              <td>{{ formatRupiah(user.total_upah_bersih) }}</td>
             </tr>
           </tbody>
         </table>
