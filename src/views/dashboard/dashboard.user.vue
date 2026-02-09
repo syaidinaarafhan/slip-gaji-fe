@@ -28,7 +28,7 @@ async function dashboardKaryawan() {
     
     const slipMap = {}
     data.slipGaji.forEach(slip => {
-      const date = new Date(slip.createdAt)
+      const date = new Date(slip.periode_gaji)
       const month = date.getMonth() + 1
       const year = date.getFullYear()
       const key = `${year}-${month}`
