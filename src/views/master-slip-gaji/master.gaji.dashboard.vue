@@ -23,6 +23,12 @@ const isDeleteModalOpen = ref(false)
 
 const isImporting = ref(false)
 
+const errorModal = ref({
+  show: false,
+  type: 'error',
+  message: '',
+})
+
 // State untuk result modal
 const resultModal = ref({
   show: false,
@@ -42,7 +48,8 @@ function showErrorModal(message) {
   resultModal.value = {
     show: true,
     type: 'error',
-    message: message
+    message: message,
+
   }
 }
 
@@ -218,7 +225,20 @@ async function handleFileUpload(event) {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
 
-    showSuccessModal(data.message || 'Import berhasil!')
+    if (!data.success) {
+      showErrorModal({
+        title: 'Import Gagal',
+        message: data.message,
+        details: data.errors // List error per baris
+      });
+    } else {
+      showSuccessModal({
+        message: `Berhasil import ${data.successCount} data`,
+        inserted: data.inserted,
+        updated: data.updated,
+        skipped: data.skipped
+      });
+    }
     
     // Refresh data
     await fetchUsers()
