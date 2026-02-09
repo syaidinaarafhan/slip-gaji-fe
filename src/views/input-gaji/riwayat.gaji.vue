@@ -41,7 +41,7 @@ const filteredSlips = computed(() => {
   
   if (selectedYear.value) {
     return user.value.slipGaji.filter(slip => {
-      const slipYear = new Date(slip.createdAt).getFullYear()
+      const slipYear = new Date(slip.periode_gaji).getFullYear()
       return slipYear === selectedYear.value
     })
   }
@@ -49,7 +49,7 @@ const filteredSlips = computed(() => {
   // Kalau tidak ada filter, tampilkan tahun sekarang
   const currentYear = new Date().getFullYear()
   return user.value.slipGaji.filter(slip => {
-    const slipYear = new Date(slip.createdAt).getFullYear()
+    const slipYear = new Date(slip.periode_gaji).getFullYear()
     return slipYear === currentYear
   })
 })
@@ -110,18 +110,18 @@ function goBack() {
           <div class="month-title">{{ monthName }}</div>
 
           <!-- Cari slip untuk bulan m (0-11) dari slip yang sudah difilter -->
-          <template v-if="filteredSlips.find(s => new Date(s.createdAt).getMonth() === m)">
+          <template v-if="filteredSlips.find(s => new Date(s.periode_gaji).getMonth() === m)">
             <div
               class="amount"
               v-text="
                 'Rp. ' + (
-                  (filteredSlips.find(s => new Date(s.createdAt).getMonth() === m)?.upah_yang_diterima || 0)
+                  (filteredSlips.find(s => new Date(s.periode_gaji).getMonth() === m)?.upah_yang_diterima || 0)
                 ).toLocaleString('id-ID')
               "
             />
             <button 
               class="detail-btn" 
-              @click="viewDetail(filteredSlips.find(s => new Date(s.createdAt).getMonth() === m)?.id)"
+              @click="viewDetail(filteredSlips.find(s => new Date(s.periode_gaji).getMonth() === m)?.id)"
             >
               🔍
             </button>

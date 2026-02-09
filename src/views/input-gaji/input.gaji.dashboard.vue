@@ -15,6 +15,15 @@ const allUsers = ref([])
 const loading = ref(false)
 const error = ref('')
 
+const selectedMonth = ref(new Date().getMonth()) // Default bulan sekarang (0-11)
+const currentYear = new Date().getFullYear()
+
+const notificationModal = ref({
+  show: false,
+  type: '', // 'success' atau 'error'
+  message: ''
+})
+
 async function fetchUsers() {
   loading.value = true
   error.value = ''
@@ -22,7 +31,6 @@ async function fetchUsers() {
     const { data } = await axiosInstance.get('/user')
     allUsers.value = data
   } catch (e) {
-    error.value = e.response?.data?.message || 'Gagal memuat data'
     console.error('Error fetching users:', e)
   } finally {
     loading.value = false
@@ -35,28 +43,76 @@ const selectedUser = ref(null)
 
 function confirmCreateSlip(user) {
   selectedUser.value = user
+  selectedMonth.value = new Date().getMonth()
   isCreateSlipModalOpen.value = true
 }
 
 async function createSlipGaji() {
   if (!selectedUser.value) return
+
+  const periodeGaji = new Date(Date.UTC(currentYear, selectedMonth.value, 1)).toISOString()
   
   loading.value = true
   error.value = ''
   try {
     await axiosInstance.post('/slip-gaji/generate-from-master', { 
-      user_id: selectedUser.value.id 
+      user_id: selectedUser.value.id,
+      periode_gaji: periodeGaji
     })
-    alert('Slip gaji berhasil dibuat!') // Atau bisa pakai toast notification
+
     isCreateSlipModalOpen.value = false
     selectedUser.value = null
+    
+    // Tampilkan modal sukses
+    notificationModal.value = {
+      show: true,
+      type: 'success',
+      message: 'Slip gaji berhasil dibuat'
+    }
+  
   } catch (e) {
-    error.value = e.response?.data?.message || 'Gagal membuat slip gaji'
+
+    notificationModal.value = {
+      show: true,
+      type: 'error',
+      message: e.response?.data?.error || 'Gagal membuat slip gaji'
+    }
+
+    isCreateSlipModalOpen.value = false
+    selectedUser.value = null
+
     console.error('Error creating slip:', e)
   } finally {
     loading.value = false
   }
 }
+
+// Helper: Convert month index ke nama bulan
+function getMonthName(monthIndex) {
+  const months = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ]
+  return months[monthIndex]
+}
+
+// Computed: List bulan untuk dropdown
+const monthOptions = computed(() => {
+  return [
+    { value: 0, label: 'Januari' },
+    { value: 1, label: 'Februari' },
+    { value: 2, label: 'Maret' },
+    { value: 3, label: 'April' },
+    { value: 4, label: 'Mei' },
+    { value: 5, label: 'Juni' },
+    { value: 6, label: 'Juli' },
+    { value: 7, label: 'Agustus' },
+    { value: 8, label: 'September' },
+    { value: 9, label: 'Oktober' },
+    { value: 10, label: 'November' },
+    { value: 11, label: 'Desember' }
+  ]
+})
 
 // ========== SEARCH ==========
 const searchQuery = ref('')
@@ -141,9 +197,9 @@ function showLogoutModal() {
 }
 
 // ========== NAVIGATION ==========
-function inputGaji(user) {
-  router.push(`/admin/input-gaji-karyawan/${user.id}`)
-}
+// function inputGaji(user) {
+//   router.push(`/admin/input-gaji-karyawan/${user.id}`)
+// }
 
 function riwayatGajiPengguna(user) {
   router.push(`/admin/riwayat-gaji-karyawan/${user.id}`)
@@ -317,9 +373,9 @@ onMounted(() => {
               <td>{{ user.nik }}</td>
               <td>{{ user.area }}</td>
               <td class="action-cell">
-                <button class="icon-btn" @click="inputGaji(user)" title="Input Gaji Karyawan">
+                <!-- <button class="icon-btn" @click="inputGaji(user)" title="Input Gaji Karyawan">
                   💵
-                </button>
+                </button> -->
                 <button class="icon-btn" @click="riwayatGajiPengguna(user)" title="Detail Riwayat Gaji">
                   ⬇️
                 </button>
@@ -376,14 +432,72 @@ onMounted(() => {
     <!-- Create Slip Confirmation Modal -->
     <n-modal
       v-model:show="isCreateSlipModalOpen"
-      preset="dialog"
-      title="Konfirmasi Buat Slip Gaji"
-      :content="`Apakah Anda yakin ingin membuat slip gaji untuk ${selectedUser?.name}?`"
-      positive-text="Ya, Buat"
-      negative-text="Batal"
-      @positive-click="createSlipGaji"
-      @negative-click="isCreateSlipModalOpen = false"
-    />
+      :mask-closable="false"
+      class="create-slip-modal"
+    >
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Buat Slip Gaji</h3>
+          <button class="modal-close-btn" @click="isCreateSlipModalOpen = false">✕</button>
+        </div>
+        
+        <div class="modal-body">
+          <p class="modal-user-name">
+            <strong>Karyawan:</strong> {{ selectedUser?.name }}
+          </p>
+          
+          <div class="form-group">
+            <label class="form-label">Pilih Bulan Gaji:</label>
+            <select v-model="selectedMonth" class="month-select">
+              <option 
+                v-for="month in monthOptions" 
+                :key="month.value" 
+                :value="month.value"
+              >
+                {{ month.label }} {{ currentYear }}
+              </option>
+            </select>
+          </div>
+          
+          <p class="modal-info">
+            ℹ️ Slip gaji akan dibuat untuk periode <strong>{{ getMonthName(selectedMonth) }} {{ currentYear }}</strong>
+          </p>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="modal-btn-cancel" @click="isCreateSlipModalOpen = false">
+            Batal
+          </button>
+          <button class="modal-btn-confirm" @click="createSlipGaji" :disabled="loading">
+            {{ loading ? 'Membuat...' : '✓ Buat Slip Gaji' }}
+          </button>
+        </div>
+      </div>
+    </n-modal>
+
+    <!-- Notification Modal -->
+    <n-modal
+      v-model:show="notificationModal.show"
+      :mask-closable="true"
+    >
+      <div class="modal-card notification-modal">
+        <div class="modal-body">
+          <div :class="['notification-icon', notificationModal.type]">
+            {{ notificationModal.type === 'success' ? '✓' : '✕' }}
+          </div>
+          <p class="notification-message">{{ notificationModal.message }}</p>
+        </div>
+        <div class="modal-footer">
+          <button 
+            class="modal-btn-confirm" 
+            @click="notificationModal.show = false"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </n-modal>
+
   </div>
 </template>
 
@@ -787,4 +901,184 @@ onMounted(() => {
     font-size: 20px;
   }
 }
+
+/* Modal Custom Styles */
+.create-slip-modal .modal-card {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #a0aec0;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.modal-close-btn:hover {
+  background: #edf2f7;
+  color: #2d3748;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-user-name {
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  color: #4a5568;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.month-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d3748;
+  background: white;
+  cursor: pointer;
+  outline: none;
+}
+
+.month-select:focus {
+  border-color: #2c5282;
+  box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+}
+
+.modal-info {
+  margin: 0;
+  padding: 12px 16px;
+  background: #ebf8ff;
+  border-left: 4px solid #3182ce;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #2c5282;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #f7fafc;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.modal-btn-cancel,
+.modal-btn-confirm {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.modal-btn-cancel {
+  background: white;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+}
+
+.modal-btn-cancel:hover {
+  background: #edf2f7;
+}
+
+.modal-btn-confirm {
+  background: #2c5282;
+  color: white;
+}
+
+.modal-btn-confirm:hover:not(:disabled) {
+  background: #234063;
+}
+
+.modal-btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.create-slip-modal :deep(.n-modal) {
+  background: white !important;
+}
+
+.create-slip-modal :deep(.n-card) {
+  background: white !important;
+}
+
+/* Alternatif: langsung target .modal-card */
+.modal-card {
+  background: white !important;
+}
+
+.notification-modal .notification-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin: 0 auto 16px;
+}
+
+.notification-icon.success {
+  background-color: #d4edda;
+  color: #28a745;
+}
+
+.notification-icon.error {
+  background-color: #f8d7da;
+  color: #dc3545;
+}
+
+.notification-message {
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
 </style>
