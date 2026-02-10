@@ -164,7 +164,7 @@ const displayError = computed(() => {
 
 // ========== PAGINATION ==========
 const currentPage = ref(1)
-const pageSize = 7
+const pageSize = 20
 
 const totalItems = computed(() => filteredUsers.value.length)
 const totalPages = computed(() => Math.ceil(totalItems.value / pageSize))
