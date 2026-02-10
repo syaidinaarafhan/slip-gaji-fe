@@ -292,7 +292,7 @@ function showMassGenerateModal() {
 async function startMassGenerate() {
   if (isGenerating.value) return
   
-  const periodeGaji = new Date(currentYear, selectedPeriodeMass.value, 1).toISOString()
+  const periodeGaji = new Date(currentYear, selectedPeriodeMass.value, 15).toISOString()
   
   isGenerating.value = true
   jobStatus.value = null
